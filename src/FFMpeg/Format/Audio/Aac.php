@@ -12,20 +12,28 @@
 namespace FFMpeg\Format\Audio;
 
 /**
- * The AAC audio format
+ * The Vorbis audio format
  */
-class Aac extends DefaultAudio
+class AAC extends DefaultAudio
 {
     public function __construct()
     {
         $this->audioCodec = 'libfdk_aac';
     }
-
+	
+	/**
+     * {@inheritdoc}
+     */
+    public function getExtraParams()
+    {
+        return array('-cutoff', '20000');
+    }
+	
     /**
      * {@inheritDoc}
      */
     public function getAvailableAudioCodecs()
     {
-        return array('libfdk_aac');
+        return array('libvo_aacenc', 'libfaac', 'libfdk_aac');
     }
 }

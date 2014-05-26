@@ -102,4 +102,16 @@ class VideoFilters extends AudioFilters
 
         return $this;
     }
+	
+	/**
+     * Optimize file for http streaming
+     *
+     * @return VideoFilters
+     */
+	public function streaming()
+    {
+        $this->media->addFilter(new Streaming());
+
+        return $this;
+    }
 }

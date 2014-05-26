@@ -92,7 +92,7 @@ class Video extends Audio
             $commands[] = '-coder';
             $commands[] = '1';
             $commands[] = '-sc_threshold';
-            $commands[] = '40';
+            $commands[] = '0';
             $commands[] = '-flags';
             $commands[] = '+loop';
             $commands[] = '-me_range';

@@ -75,6 +75,9 @@ class FrameRateFilter implements VideoFilterInterface
             $commands[] = '3';
             $commands[] = '-g';
             $commands[] = $this->gop;
+			
+			$commands[] = '-keyint_min';
+			$commands[] = $this->gop;
         }
 
         return $commands;

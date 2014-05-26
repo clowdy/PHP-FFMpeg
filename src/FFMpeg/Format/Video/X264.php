@@ -16,7 +16,7 @@ namespace FFMpeg\Format\Video;
  */
 class X264 extends DefaultVideo
 {
-    public function __construct($audioCodec = 'libfaac', $videoCodec = 'libx264')
+    public function __construct($audioCodec = 'libfdk_aac', $videoCodec = 'libx264')
     {
         $this
             ->setAudioCodec($audioCodec)
@@ -30,13 +30,21 @@ class X264 extends DefaultVideo
     {
         return true;
     }
+	
+	/**
+     * {@inheritDoc}
+     */
+    public function getExtraParams()
+    {
+        return array('-pix_fmt', 'yuv420p');
+    }
 
     /**
      * {@inheritDoc}
      */
     public function getAvailableAudioCodecs()
     {
-        return array('libvo_aacenc', 'libfaac', 'libmp3lame');
+        return array('libvo_aacenc', 'libfaac', 'libmp3lame', 'libfdk_aac');
     }
 
     /**

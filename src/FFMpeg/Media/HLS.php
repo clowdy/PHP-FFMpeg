@@ -12,25 +12,26 @@
 namespace FFMpeg\Media;
 
 use Alchemy\BinaryDriver\Exception\ExecutionFailureException;
-use FFMpeg\Filters\Audio\AudioFilters;
+use FFMpeg\Filters\HLS\HLSFilters;
+use FFMpeg\Filters\HLS\SimpleFilter;
 use FFMpeg\Format\FormatInterface;
-use FFMpeg\Filters\Audio\SimpleFilter;
 use FFMpeg\Exception\RuntimeException;
 use FFMpeg\Exception\InvalidArgumentException;
 use FFMpeg\Filters\Audio\AudioFilterInterface;
 use FFMpeg\Filters\FilterInterface;
 use FFMpeg\Format\ProgressableInterface;
+use FFMpeg\Format\HLSInterface;
 
-class Audio extends AbstractStreamableMedia
+class HLS extends AbstractStreamableMedia
 {
     /**
      * {@inheritdoc}
      *
-     * @return AudioFilters
+     * @return HLSFilters
      */
     public function filters()
     {
-        return new AudioFilters($this);
+        return new HLSFilters($this);
     }
 
     /**
@@ -70,24 +71,45 @@ class Audio extends AbstractStreamableMedia
         $commands = array('-y', '-i', $this->pathfile);
 
         $filters = clone $this->filters;
-        $filters->add(new SimpleFilter($format->getExtraParams(), 10));
-
-        if ($this->driver->getConfiguration()->has('ffmpeg.threads')) {
-            $filters->add(new SimpleFilter(array('-threads', $this->driver->getConfiguration()->get('ffmpeg.threads'))));
+		$filters->add(new SimpleFilter($format->getExtraParams(), 10));
+		
+		if ($format instanceOf HLSInterface) {
+            if (null !== $format->getCodec()) {
+                $filters->add(new SimpleFilter(array('-codec', $format->getCodec())));
+            }
         }
-        if (null !== $format->getAudioCodec()) {
-            $filters->add(new SimpleFilter(array('-acodec', $format->getAudioCodec())));
-        }
-
-        foreach ($filters as $filter) {
+		
+		foreach ($filters as $filter) {
             $commands = array_merge($commands, $filter->apply($this, $format));
         }
 
-        if (null !== $format->getAudioKiloBitrate()) {
-            $commands[] = '-b:a';
-            $commands[] = $format->getAudioKiloBitrate() . 'k';
-        }
-        $commands[] = $outputPathfile;
+		$commands[] = '-map';
+		$commands[] = '0';
+		$commands[] = '-vbsf';
+		$commands[] = 'h264_mp4toannexb';
+		$commands[] = '-f';
+		$commands[] = 'segment';
+		
+		$commands[] = '-segment_time';
+		$commands[] = $format->getSegmentTime();
+		$commands[] = '-segment_list_type';
+		$commands[] = $format->getSegmentListType();
+		
+		$output = pathinfo($outputPathfile);
+		$dir = $output['dirname'];
+		if (!file_exists($dir)) {
+			mkdir($dir);
+		}
+		$segmentList = $dir . '/' . $output['filename'] . '.m3u8';
+		$segments = $dir . '/' . $output['filename'] . '_%d.ts';
+		
+		$commands[] = '-segment_list';
+		$commands[] = $segmentList;
+		$commands[] = '-segment_list_flags';
+		$commands[] = $format->getSegmentListFlags();
+		$commands[] = '-segment_format';
+		$commands[] = $format->getSegmentFormat();
+		$commands[] = $segments;
 
         try {
             $this->driver->command($commands, false, $listeners);

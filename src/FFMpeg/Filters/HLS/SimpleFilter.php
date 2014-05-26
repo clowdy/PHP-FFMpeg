@@ -1,11 +1,11 @@
 <?php
 
-namespace FFMpeg\Filters\Audio;
+namespace FFMpeg\Filters\HLS;
 
-use FFMpeg\Media\Audio;
-use FFMpeg\Format\AudioInterface;
+use FFMpeg\Media\HLS;
+use FFMpeg\Format\HLSInterface;
 
-class SimpleFilter implements AudioFilterInterface
+class SimpleFilter implements HLSFilterInterface
 {
     private $params;
     private $priority;
@@ -27,7 +27,7 @@ class SimpleFilter implements AudioFilterInterface
     /**
      * {@inheritdoc}
      */
-    public function apply(Audio $audio, AudioInterface $format)
+    public function apply(HLS $media, HLSInterface $format)
     {
         return $this->params;
     }

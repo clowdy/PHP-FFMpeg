@@ -17,6 +17,7 @@ use FFMpeg\Exception\InvalidArgumentException;
 use FFMpeg\Exception\RuntimeException;
 use FFMpeg\Media\Audio;
 use FFMpeg\Media\Video;
+use FFMpeg\Media\HLS;
 use Psr\Log\LoggerInterface;
 
 class FFMpeg
@@ -82,25 +83,36 @@ class FFMpeg
      * Opens a file in order to be processed.
      *
      * @param string $pathfile A pathfile
+     * @param string $as overwrite the type detection return
+     *                   (return video file as audio)
      *
      * @return Audio|Video
      *
      * @throws InvalidArgumentException
      */
-    public function open($pathfile)
+    public function open($pathfile, $as = null)
     {
         if (null === $streams = $this->ffprobe->streams($pathfile)) {
             throw new RuntimeException(sprintf('Unable to probe "%s".', $pathfile));
         }
-
-        if (0 < count($streams->videos())) {
-            return new Video($pathfile, $this->driver, $this->ffprobe);
-        } elseif (0 < count($streams->audios())) {
-            return new Audio($pathfile, $this->driver, $this->ffprobe);
-        }
-
-        throw new InvalidArgumentException('Unable to detect file format, only audio and video supported');
+		
+		$type = $this->detect($streams);
+		$type = (is_null($as)) ? $type['type'] : $as;
+		
+		if ($type === 'video') {
+			return new Video($pathfile, $this->driver, $this->ffprobe);
+		} else if ($type === 'audio') {
+			return new Audio($pathfile, $this->driver, $this->ffprobe);
+		} else if ($type === 'image') {
+			return new Video($pathfile, $this->driver, $this->ffprobe);
+		}
+		
+		throw new InvalidArgumentException('Unable to detect file format, only audio and video supported');
     }
+	
+	public function getHls($pathfile) {
+		return new HLS($pathfile, $this->driver, $this->ffprobe);
+	}
 
     /**
      * Creates a new FFMpeg instance.
@@ -119,4 +131,19 @@ class FFMpeg
 
         return new static(FFMpegDriver::create($logger, $configuration), $probe);
     }
+	
+	public function detect($streams)
+	{
+		foreach($streams as $stream) {
+			if ($stream->isVideo()) {
+				return array('type' => 'video');
+			} else if ($stream->isAudio()) {
+				return array('type' => 'audio');
+			} else if ($stream->isImage()) {
+				return array('type' => 'image');
+			} else {
+				return array('type' => 'other');
+			}
+		}
+	}
 }

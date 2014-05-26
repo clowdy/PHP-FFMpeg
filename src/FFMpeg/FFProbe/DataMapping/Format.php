@@ -13,4 +13,25 @@ namespace FFMpeg\FFProbe\DataMapping;
 
 class Format extends AbstractData
 {
+	public function getDuration()
+    {
+        $duration = null;
+
+        if ($this->has('duration')) {
+            $duration = $this->get('duration');
+        }
+
+        return $duration;
+    }
+	
+	public function getBitrate()
+    {
+		$bitrate = null;
+
+        if ($this->has('bit_rate')) {
+            $bitrate = $this->get('bit_rate');
+        }
+
+        return $bitrate;
+    }
 }

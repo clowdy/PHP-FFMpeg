@@ -9,23 +9,31 @@
  * file that was distributed with this source code.
  */
 
-namespace FFMpeg\Format\Audio;
+namespace FFMpeg\Format\HLS;
 
 /**
- * The WAV audio format
+ * The Flac audio format
  */
-class Wav extends DefaultAudio
+class Copy extends DefaultHLS
 {
     public function __construct()
     {
-        $this->audioCodec = 'pcm_s16le';
+        $this->codec = 'copy';
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getAvailableAudioCodecs()
+    public function getAvailableCodecs()
     {
-        return array('pcm_s16le');
+        return array('copy');
     }
+
+	/**
+     * {@inheritDoc}
+     */
+	public function getExtraParams() {
+		return array();
+	}
+
 }

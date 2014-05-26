@@ -9,85 +9,97 @@
  * file that was distributed with this source code.
  */
 
-namespace FFMpeg\Format\Audio;
+namespace FFMpeg\Format\HLS;
 
 use Evenement\EventEmitter;
 use FFMpeg\Exception\InvalidArgumentException;
-use FFMpeg\Format\AudioInterface;
+use FFMpeg\Format\HLSInterface;
 use FFMpeg\Media\MediaTypeInterface;
 use FFMpeg\Format\ProgressableInterface;
-use FFMpeg\Format\ProgressListener\AudioProgressListener;
+use FFMpeg\Format\ProgressListener\HLSProgressListener;
 use FFMpeg\FFProbe;
 
-abstract class DefaultAudio extends EventEmitter implements AudioInterface, ProgressableInterface
+abstract class DefaultHLS extends EventEmitter implements HLSInterface, ProgressableInterface
 {
     /** @var string */
-    protected $audioCodec;
-
-    /** @var integer */
-    protected $audioKiloBitrate = 128;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getExtraParams()
-    {
-        return array();
-    }
+    protected $codec;
+	
+	protected $segmentTime = 10;
+	
+	protected $segmentListType = 'm3u8';
+	
+	protected $segmentListFlags = '+live';
+	
+	protected $segmentFormat = 'mpegts';
 
     /**
      * {@inheritdoc}
      */
-    public function getAudioCodec()
+    public function getCodec()
     {
-        return $this->audioCodec;
+        return $this->codec;
     }
 
     /**
      * Sets the audio codec, Should be in the available ones, otherwise an
      * exception is thrown.
      *
-     * @param string $audioCodec
+     * @param string $codec
      *
      * @throws InvalidArgumentException
      */
-    public function setAudioCodec($audioCodec)
+    public function setCodec($codec)
     {
-        if ( ! in_array($audioCodec, $this->getAvailableAudioCodecs())) {
+        if ( ! in_array($codec, $this->getAvailableCodecs())) {
             throw new InvalidArgumentException(sprintf(
                     'Wrong audiocodec value for %s, available formats are %s'
-                    , $audioCodec, implode(', ', $this->getAvailableAudioCodecs())
+                    , $codec, implode(', ', $this->getAvailableAudioCodecs())
             ));
         }
 
-        $this->audioCodec = $audioCodec;
+        $this->codec = $codec;
 
         return $this;
     }
-
-    /**
+	
+	/**
      * {@inheritdoc}
      */
-    public function getAudioKiloBitrate()
+    public function getExtraParams()
     {
-        return $this->audioKiloBitrate;
+        return array();
     }
-
-    /**
-     * Sets the kiloBitrate value.
-     *
-     * @param  integer                  $kiloBitrate
-     * @throws InvalidArgumentException
+	
+	/**
+     * {@inheritdoc}
      */
-    public function setAudioKiloBitrate($kiloBitrate)
+    public function getSegmentTime()
     {
-        if ($kiloBitrate < 1) {
-            throw new InvalidArgumentException('Wrong kiloBitrate value');
-        }
-
-        $this->audioKiloBitrate = (int) $kiloBitrate;
-
-        return $this;
+        return $this->segmentTime;
+    }
+	
+	/**
+     * {@inheritdoc}
+     */
+    public function getSegmentListType()
+    {
+        return $this->segmentListType;
+    }
+	
+	/**
+     * {@inheritdoc}
+     */
+    public function getSegmentListFlags()
+    {
+        return $this->segmentListFlags;
+    }
+	
+	/**
+     * {@inheritdoc}
+     */
+    public function getSegmentFormat()
+    {
+        return $this->segmentFormat;
     }
 
     /**
@@ -96,7 +108,7 @@ abstract class DefaultAudio extends EventEmitter implements AudioInterface, Prog
     public function createProgressListener(MediaTypeInterface $media, FFProbe $ffprobe, $pass, $total)
     {
         $format = $this;
-        $listener = new AudioProgressListener($ffprobe, $media->getPathfile(), $pass, $total);
+        $listener = new HLSProgressListener($ffprobe, $media->getPathfile(), $pass, $total);
         $listener->on('progress', function () use ($media, $format) {
            $format->emit('progress', array_merge(array($media, $format), func_get_args()));
         });

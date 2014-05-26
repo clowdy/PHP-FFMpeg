@@ -17,6 +17,10 @@ use FFMpeg\Coordinate\Dimension;
 
 class Stream extends AbstractData
 {
+	const VIDEO = 'video';
+	const IMAGE = 'image';
+	const AUDIO = 'audio';
+	
     /**
      * Returns true if the stream is an audio stream.
      *
@@ -34,7 +38,54 @@ class Stream extends AbstractData
      */
     public function isVideo()
     {
-        return $this->has('codec_type') ? 'video' === $this->get('codec_type') : false;
+        return self::VIDEO === $this->isVideoOrImage();
+    }
+	
+	/**
+     * Returns true if the stream is a video stream.
+     *
+     * @return Boolean
+     */
+    public function isImage()
+    {
+		return self::IMAGE === $this->isVideoOrImage();
+    }
+	
+	/**
+     * Returns true if the stream is a video stream.
+     *
+     * @return Boolean
+     */
+    private function isVideoOrImage()
+    {
+        $codec = $this->has('codec_type') ? 'video' === $this->get('codec_type') : false;
+		
+		if ($codec) {
+			if ($this->has('nb_frames') or $this->has('bit_rate')) {
+				return self::VIDEO;
+			} else if ($this->has('avg_frame_rate') && $this->get('avg_frame_rate') != '0/0') {
+				return self::VIDEO;
+			} else {
+				return self::IMAGE;
+			}
+		}
+		
+		return false;
+    }
+	
+	public function getBitrate()
+    {
+        if ($this->isImage()) {
+            throw new LogicException('Dimensions can only be retrieved from video or audio streams.');
+        }
+
+        $bitrate = null;
+
+        if ($this->has('bit_rate')) {
+            $bitrate = $this->get('bit_rate');
+        }
+
+        return $bitrate;
     }
 
     /**
@@ -47,7 +98,7 @@ class Stream extends AbstractData
      */
     public function getDimensions()
     {
-        if (!$this->isVideo()) {
+        if ($this->isAudio()) {
             throw new LogicException('Dimensions can only be retrieved from video streams.');
         }
 

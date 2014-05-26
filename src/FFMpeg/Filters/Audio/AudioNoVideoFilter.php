@@ -14,16 +14,13 @@ namespace FFMpeg\Filters\Audio;
 use FFMpeg\Format\AudioInterface;
 use FFMpeg\Media\Audio;
 
-class AudioResamplableFilter implements AudioFilterInterface
+class AudioNoVideoFilter implements AudioFilterInterface
 {
-    /** @var string */
-    private $rate;
     /** @var integer */
     private $priority;
 
-    public function __construct($rate, $priority = 0)
+    public function __construct($priority = 0)
     {
-        $this->rate = $rate;
         $this->priority = $priority;
     }
 
@@ -36,19 +33,10 @@ class AudioResamplableFilter implements AudioFilterInterface
     }
 
     /**
-     *
-     * @return Integer
-     */
-    public function getRate()
-    {
-        return $this->rate;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function apply(Audio $audio, AudioInterface $format)
     {
-        return array('-ac', 2, '-ar', $this->rate);
+        return array('-vn');
     }
 }

@@ -10,26 +10,19 @@
  */
 namespace FFMpeg\Format;
 
-interface AudioInterface extends FormatInterface
+interface HLSInterface extends FormatInterface
 {
-    /**
-     * Gets the audio kiloBitrate value.
-     *
-     * @return integer
-     */
-    public function getAudioKiloBitrate();
-
-    /**
+	/**
      * Returns the audio codec.
      *
      * @return string
      */
-    public function getAudioCodec();
-
-    /**
-     * Returns the list of available audio codecs for this format.
+    public function getCodec();
+	
+	/**
+     * Returns the list of available codecs for this format.
      *
      * @return array
      */
-    public function getAvailableAudioCodecs();
+    public function getAvailableCodecs();
 }
