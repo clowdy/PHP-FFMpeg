@@ -60,7 +60,7 @@ class X264 extends DefaultVideo
      */
     public function getPasses()
     {
-        return 2;
+        return 1;
     }
 
     public function getModulus()
