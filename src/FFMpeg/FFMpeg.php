@@ -134,16 +134,28 @@ class FFMpeg
 	
 	public function detect($streams)
 	{
+		$hasVideoStream = false;
+		$hasAudioStream = false;
+		$hasImageStream = false;
+		
 		foreach($streams as $stream) {
 			if ($stream->isVideo()) {
-				return array('type' => 'video');
+				$hasVideoStream = true;
 			} else if ($stream->isAudio()) {
-				return array('type' => 'audio');
+				$hasAudioStream = true;
 			} else if ($stream->isImage()) {
-				return array('type' => 'image');
-			} else {
-				return array('type' => 'other');
+				$hasImageStream = true;
 			}
 		}
+		
+		if ($hasVideoStream) {
+			return array('type' => 'video');
+		} else if ($hasAudioStream) {
+			return array('type' => 'audio');
+		} else if ($hasImageStream) {
+			return array('type' => 'image');
+		}
+		
+		return array('type' => 'other');
 	}
 }
