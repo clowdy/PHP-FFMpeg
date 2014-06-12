@@ -98,4 +98,9 @@ class Audio extends AbstractStreamableMedia
 
         return $this;
     }
+    
+    public function saveThumb($destPath)
+    {
+        $this->driver->command(array("-y", "-i", $this->pathfile, $destPath));
+    }
 }
