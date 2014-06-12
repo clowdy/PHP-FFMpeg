@@ -14,7 +14,7 @@ namespace FFMpeg\Format\Audio;
 /**
  * The Vorbis audio format
  */
-class AAC extends DefaultAudio
+class Aac extends DefaultAudio
 {
     public function __construct()
     {
