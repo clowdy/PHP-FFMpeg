@@ -12,7 +12,7 @@
 namespace FFMpeg\Format\Audio;
 
 /**
- * The AAC audio format
+ * The Aac audio format
  */
 class Aac extends DefaultAudio
 {
