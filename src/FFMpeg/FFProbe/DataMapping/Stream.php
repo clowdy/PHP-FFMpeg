@@ -107,25 +107,28 @@ class Stream extends AbstractData
         if ($this->has('width')) {
             $width = $this->get('width');
         }
+        
         if ($this->has('height')) {
             $height = $this->get('height');
         }
-        if (null !== $ratio = $this->extractRatio($this, 'sample_aspect_ratio')) {
+        
+        if (null === $height || null === $width) {
+            throw new RuntimeException('Unable to extract dimensions.');
+        }
+        
+        // not working with mkv files so commented out for now
+        /*if (null !== $ratio = $this->extractRatio($this, 'sample_aspect_ratio')) {
             $sampleRatio = $ratio;
         }
         if (null !== $ratio = $this->extractRatio($this, 'display_aspect_ratio')) {
             $displayRatio = $ratio;
         }
 
-        if (null === $height || null === $width) {
-            throw new RuntimeException('Unable to extract dimensions.');
-        }
-
         if (null !== $displayRatio && null !== $sampleRatio) {
             if ($sampleRatio[0] !== 1 && $sampleRatio[1] !== 1) {
                 $width = round($width / $sampleRatio[0] * $sampleRatio[1] * $displayRatio[0] / $displayRatio[1]);
             }
-        }
+        }*/
 
         return new Dimension($width, $height);
     }
